@@ -1,0 +1,13 @@
+@media screen and (min-width:1400px) {
+  .page {
+      margin-right:10%;
+      margin-left:10%;
+    }
+}
+
+@media screen and (min-width:2200px) {
+  .page {
+      margin-right:25%;
+      margin-left:25%;
+    }
+}

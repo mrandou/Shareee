@@ -1,12 +1,23 @@
 import React from 'react';
 import axios from 'axios';
-import { Avatar, Card, Row, Col } from 'antd';
+import { Avatar, Card, Row, Col, Modal, PageHeader, Button,
+   Form, Input, Skeleton } from 'antd';
+import { MessageOutlined, HeartOutlined, ShareAltOutlined} from '@ant-design/icons';
+import headerStyle from '../Style/MessageStyle';
+import defaultPic from '../Assets/defaultpic.jpg'
+import DropFile from './DropFile';
+import "../Style/Page.css"
+// import icon from '../Assets/icon.png'
 
 export default class messages extends React.Component {
  constructor(props) {
     super(props);
     this.state = {
       data: [],
+      picture: "",
+      currentItem: "",
+      modalVisible: false,
+      messageModalVisible: false,
     }; 
   }
 
@@ -21,46 +32,193 @@ export default class messages extends React.Component {
         this.setState({ data });
       })
     }
+
+    setModalVisible(modalVisible, currentItem) {
+      this.setState({ modalVisible });
+      if (currentItem)
+        this.setState({ currentItem })
+    }
+
+    setMessageModalVisible(messageModalVisible) {
+      this.setState({ messageModalVisible });
+    }
+    
+
+    newMessage = (message) => {
+      var newData = [
+        {
+          "id" : this.state.data.data.length,
+          "owner": {"firstName": message.post.user.firstname, "lastName": message.post.user.lastname},
+          "text": message.post.message,
+          "image": !this.state.picture ? defaultPic : this.state.picture,
+          "likes" : 0,
+        }
+      ]
+      this.state.data.data.push(newData[0])
+      this.setMessageModalVisible(false);
+    }
+
+    getBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
+    }
+
+    getPic = async filePic => {
+      if (filePic)
+      {
+        const picture = await this.getBase64(filePic.originFileObj)
+        this.setState({ picture })
+      }
+      else
+        this.setState ({ picture: null })
+    }
+
+    messageForm = () => {
+
+      // const layout = {
+      //   labelCol: { span: 8 },
+      //   wrapperCol: { span: 16 },
+      // };
+      
+      const validateMessages = {
+        required: 'This field is required!',
+        // types: {
+        //   email: 'Not validate email!',
+        // },
+      };
+
+      return (
+          <Form name="nest-messages" onFinish={this.newMessage} validateMessages={validateMessages}>
+            <Form.Item name={['post', 'user', 'firstname']} label="First name" rules={[{ required: true }]}>
+              <Input />
+            </Form.Item>
+            <Form.Item name={['post', 'user', 'lastname']} label="Last name" rules={[{ required: true }]}>
+              <Input />
+            </Form.Item>
+            <Form.Item name={['post', 'message']} label="Message">
+              <Input.TextArea />
+            </Form.Item>
+            <Form.Item>
+              <DropFile picture={this.getPic} />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit">
+                Submit
+              </Button>
+            </Form.Item>
+          </Form>
+      )
+    }
+
+    createNewMessage = () => {
+      return (
+        <Modal
+          visible={this.state.messageModalVisible}
+          onOk={() => this.setMessageModalVisible(false)}
+          onCancel={() => this.setMessageModalVisible(false)}
+          footer={null}
+          >
+            {this.messageForm()}
+          </Modal>
+      )
+    }
+
+    loadingCards = () => {
+      var emptyCards = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+      return (
+        emptyCards.map((key) => 
+          <Col key={key} xs={{ span: 24 }} md={{ span: 10 }} lg={{ span: 8 }}>
+            <Card
+              style={{ maxWidth: 330, margin: "0 auto" }}
+              cover={
+                <div style={{ width: "auto", height: 200, overflow: "hidden" }} >
+                    <img 
+                      alt="default"
+                      src={defaultPic}
+                      style={{ maxWidth:"330px", cursor:"wait", opacity:"30%" }}
+                    />
+                </div>
+              }
+            >
+              <Skeleton active avatar />
+            </Card>
+          </Col>
+        )
+      )
+    }
     
     elemCard = (item) => {
       return (
-        <Col span={4} offset={1} style={{ marginTop: "30px" }}>
-         <div style={{width:"300px", height:"20px", border:"1px solid #f0f0f0" }}/>
+        <Col key={item.id} xs={{ span: 24 }} md={{ span: 10 }} lg={{ span: 8 }}>
+         {/* <div style={{ height:"20px", border:"1px solid #f0f0f0" }}/> */}
           <Card
-            style={{width: 300}}
+            style={{ maxWidth: 330, margin: "0 auto" }}
+            actions={
+              [
+                <div>{item.likes} <HeartOutlined/></div>,
+                <ShareAltOutlined />
+              ]
+            }
             cover={
-              <div style={{ width: 300, height: 200, overflow: "hidden" }}>
+              <div style={{ width: "auto", height: 200, overflow: "hidden" }} onClick={() => this.setModalVisible(true, item)}>
                   <img 
                     alt="post"
                     src={item.image}
-                    style={{ maxWidth:"300px" }}
+                    style={{ maxWidth:"330px", cursor:"zoom-in" }}
                   />
               </div>
             }
           >
             <Card.Meta
-              avatar={<Avatar src={item.owner.picture} />}
+              avatar={
+                item.owner.picture ?
+                <Avatar src={item.owner.picture} /> : 
+                <Avatar style={{ color: '#f56a00', backgroundColor: '#fde3cf' }}>{item.owner.firstName[0]}</Avatar>
+              }
               title={<p>{item.owner.firstName} {item.owner.lastName}</p>}
               description={item.text}
             />
           </Card>
+            <Modal
+              centered
+              width={800}
+              visible={this.state.modalVisible}
+              onOk={() => this.setModalVisible(false)}
+              onCancel={() => this.setModalVisible(false)}
+            >
+            <img alt="pic_full" src={this.state.currentItem.image} style={{ maxWidth: "600px" }} />
+          </Modal>
         </Col>
       )
     }
     
     render() {
       const info = this.state.data;
-      console.log(info);
-    return (
-      <Row justify="center" align="top">
-        {
-          info.data ?
-            info.data.map((item) =>
-             this.elemCard(item)
-            )
-          : null
-        }
-      </Row>
-    )
+      return (
+        <div>
+          <PageHeader
+            style={headerStyle}
+            title="Shareee"
+            // subTitle="your life"
+            extra={[
+              <Button key="1" type="text" size="middle" icon={<MessageOutlined/>} onClick={() => this.setMessageModalVisible(true)}/>
+            ]}
+          />
+          <this.createNewMessage/>
+          <Row justify="center" align="space-between" gutter={[0, 16]} className="page">
+            {
+              info.data ?
+                info.data.map((item) =>
+                this.elemCard(item)
+                )
+              : <this.loadingCards/>
+            }
+          </Row>
+        </div>
+      )
   }
 }

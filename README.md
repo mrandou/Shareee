@@ -1,3 +1,10 @@
+# Shareee
+### Example message flow, working with an API.
+
+#### Still working on!
+
+![alt text](https://nsa40.casimages.com/img/2020/09/24/20092406304625748.png "Shareee")
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
@@ -66,4 +73,3 @@ This section has moved here: https://facebook.github.io/create-react-app/docs/de
 ### `yarn build` fails to minify
 
 This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
-# Shareee

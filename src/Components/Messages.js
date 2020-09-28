@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import { Avatar, Card, Row, Col, Modal, PageHeader, Button,
-   Form, Input, Skeleton } from 'antd';
+   Form, Input, Skeleton, Image } from 'antd';
 import { MessageOutlined, HeartOutlined, ShareAltOutlined} from '@ant-design/icons';
 import headerStyle from '../Style/MessageStyle';
 import defaultPic from '../Assets/defaultpic.jpg'
@@ -17,7 +17,6 @@ export default class messages extends React.Component {
       picture: "",
       currentItem: "",
       userLikes: [],
-      modalVisible: false,
       messageModalVisible: false,
     }; 
   }
@@ -32,12 +31,6 @@ export default class messages extends React.Component {
         const data = res.data;
         this.setState({ data });
       })
-    }
-
-    setModalVisible(modalVisible, currentItem) {
-      this.setState({ modalVisible });
-      if (currentItem)
-        this.setState({ currentItem })
     }
 
     setMessageModalVisible(messageModalVisible) {
@@ -188,8 +181,8 @@ export default class messages extends React.Component {
               ]
             }
             cover={
-              <div style={{ width: "auto", height: 200, overflow: "hidden" }} onClick={() => this.setModalVisible(true, item)}>
-                  <img 
+              <div style={{ width: "auto", height: 200, overflow: "hidden" }}>
+                  <Image 
                     alt="post"
                     src={item.image}
                     style={{ maxWidth:"330px", cursor:"zoom-in" }}
@@ -207,15 +200,6 @@ export default class messages extends React.Component {
               description={item.text}
             />
           </Card>
-            <Modal
-              centered
-              width={800}
-              visible={this.state.modalVisible}
-              onOk={() => this.setModalVisible(false)}
-              onCancel={() => this.setModalVisible(false)}
-            >
-            <img alt="pic_full" src={this.state.currentItem.image} style={{ maxWidth: "600px" }} />
-          </Modal>
         </Col>
       )
     }

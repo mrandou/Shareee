@@ -16,6 +16,7 @@ export default class messages extends React.Component {
       data: [],
       picture: "",
       currentItem: "",
+      userLikes: [],
       modalVisible: false,
       messageModalVisible: false,
     }; 
@@ -127,6 +128,29 @@ export default class messages extends React.Component {
       )
     }
 
+    alreadyLiked = (id) => {
+      const idLikes = this.state.userLikes;
+      for (var i = 0; i <= idLikes.length; i++)
+        if (id === idLikes[i])
+          return i;
+      return -1;
+    }
+
+    like = (item, index) => {
+      let newData = this.state.data;
+      var i;
+      if ((i = this.alreadyLiked(item.id)) !== -1)
+      {
+          this.state.userLikes.splice(i, 1, "");      //Post API for update userLikes
+          newData.data[index].likes -= 1;
+          this.setState({ data: newData });           //Post API for update data
+          return ;
+      }
+      newData.data[index].likes += 1;
+      this.state.userLikes.push(item.id);             //Post API for update userLikes
+      this.setState({ data: newData });               //Post API for update data
+    }
+
     loadingCards = () => {
       var emptyCards = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
       return (
@@ -151,7 +175,7 @@ export default class messages extends React.Component {
       )
     }
     
-    elemCard = (item) => {
+    elemCard = (item, index) => {
       return (
         <Col key={item.id} xs={{ span: 24 }} md={{ span: 10 }} lg={{ span: 8 }}>
          {/* <div style={{ height:"20px", border:"1px solid #f0f0f0" }}/> */}
@@ -159,7 +183,7 @@ export default class messages extends React.Component {
             style={{ maxWidth: 330, margin: "0 auto" }}
             actions={
               [
-                <div>{item.likes} <HeartOutlined/></div>,
+                <div onClick={() => this.like(item, index)} style={ this.alreadyLiked(item.id) !== -1 ? { color: "#1e93ff" } : null}>{item.likes} <HeartOutlined/></div>,
                 <ShareAltOutlined />
               ]
             }
@@ -212,8 +236,8 @@ export default class messages extends React.Component {
           <Row justify="center" align="space-between" gutter={[0, 16]} className="page">
             {
               info.data ?
-                info.data.map((item) =>
-                this.elemCard(item)
+                info.data.map((item, index) =>
+                this.elemCard(item, index),
                 )
               : <this.loadingCards/>
             }
